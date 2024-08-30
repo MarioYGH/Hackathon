@@ -53,48 +53,41 @@ def graficar_gradientes(gradiente_x, gradiente_y):
     plt.show()
     
 
-def graficar_gradientes_3d(gradiente_x, gradiente_y, pendiente):
-    ##### Opcion 1
+def graficar_superficie_y_gradientes_3d(gradiente_x, gradiente_y, pendiente):
+    """
+    Grafica la superficie continua de pendiente y el campo de gradientes en 3D en gráficos separados.
+
+    Args:
+        gradiente_x (np.ndarray): Gradiente en la dirección X.
+        gradiente_y (np.ndarray): Gradiente en la dirección Y.
+        pendiente (np.ndarray): Pendiente del terreno.
+    """
+    # Crear una figura con dos subgráficas
+    fig = plt.figure(figsize=(18, 12))
     
-    # # Graficar el campo de gradientes como flechas en 3D
-    # ax.quiver(X, Y, Z, gradiente_x, gradiente_y, np.zeros_like(gradiente_x), length=1, normalize=True, color='blue')
-    
-    # # Configurar el título y las etiquetas
-    # ax.set_title('Campo de Gradientes en 3D')
-    # ax.set_xlabel('Dirección X')
-    # ax.set_ylabel('Dirección Y')
-    # ax.set_zlabel('Pendiente')
-    
-    # # Mostrar la gráfica
-    # plt.show()
-    
-    ### Opcion 2
-    
-    # Crear una figura y un eje 3D
-    fig = plt.figure(figsize=(12, 10))
-    ax = fig.add_subplot(111, projection='3d')
-    
-    # Crear una malla de coordenadas
+    # Subgráfica 1: Superficie continua y contornos
+    ax1 = fig.add_subplot(121, projection='3d')
     X, Y = np.meshgrid(np.arange(gradiente_x.shape[1]), np.arange(gradiente_x.shape[0]))
     Z = pendiente
-
-    # Graficar la superficie
-    surf = ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none')
-
-    # Graficar las líneas de contorno
-    cont = ax.contour3D(X, Y, Z, 50, cmap='viridis', alpha=0.5)
-
-    # Configurar el título y las etiquetas
-    ax.set_title('Superficie de Pendiente y Gradientes en 3D')
-    ax.set_xlabel('Dirección X')
-    ax.set_ylabel('Dirección Y')
-    ax.set_zlabel('Pendiente')
-
-    # Agregar una barra de color
-    fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
-
-    # Mostrar la gráfica
+    surf = ax1.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none')
+    cont = ax1.contour3D(X, Y, Z, 50, cmap='viridis', alpha=0.5)
+    ax1.set_title('Superficie de Pendiente y Gradientes en 3D')
+    ax1.set_xlabel('Dirección X')
+    ax1.set_ylabel('Dirección Y')
+    ax1.set_zlabel('Pendiente')
+    fig.colorbar(surf, ax=ax1, shrink=0.5, aspect=5)
+    
+    # Subgráfica 2: Campo de gradientes
+    ax2 = fig.add_subplot(122, projection='3d')
+    ax2.quiver(X, Y, Z, gradiente_x, gradiente_y, np.zeros_like(gradiente_x), length=1, normalize=True, color='blue')
+    ax2.set_title('Campo de Gradientes en 3D')
+    ax2.set_xlabel('Dirección X')
+    ax2.set_ylabel('Dirección Y')
+    ax2.set_zlabel('Pendiente')
+    
+    # Mostrar la figura con ambas subgráficas
     plt.show()
+
         
 # viz.NASADEM_hillshade.tif
 # output_SRTMGL3.tif
@@ -103,7 +96,8 @@ ruta_archivo = 'output_NASADEM.tif'
 gradiente_x, gradiente_y, pendiente = analizar_topografia(ruta_archivo)
 
 graficar_gradientes(gradiente_x, gradiente_y)
-graficar_gradientes_3d(gradiente_x, gradiente_y, pendiente)
+graficar_superficie_y_gradientes_3d(gradiente_x, gradiente_y, pendiente)
+
 
 # Imprimir los resultados
 print("Gradiente X:\n", gradiente_x)
