@@ -11,14 +11,12 @@ def classify_structure(magnitude_normalized):
     :param magnitude_normalized: Magnitud del gradiente normalizado (de 0 a 1)
     :return: El tipo de estructura de recolección de agua recomendada.
     """
-    if magnitude_normalized <= 0.2:
+    if magnitude_normalized <= 0.05:
         return "Estanques"
-    elif 0.2 < magnitude_normalized <= 0.5:
+    elif 0.05 < magnitude_normalized <= 0.1:
         return "Medias lunas"
-    
-    elif 0.5 < magnitude_normalized <= 0.7:
+    elif 0.1 < magnitude_normalized <= 0.15:
         return "Zanjas de infiltración"
-        
     else:
         return "Terraza"
 
