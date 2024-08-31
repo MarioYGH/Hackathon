@@ -3,14 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import generic_filter
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.patches as mpatches
+import pandas as pd
 
+# Función para clasificar la estructura de recolección de agua basada en la magnitud del gradiente normalizado
 def classify_structure(magnitude_normalized):
-    """
-    Clasifica la estructura de recolección de agua basada en la magnitud del gradiente normalizado.
-
-    :param magnitude_normalized: Magnitud del gradiente normalizado (de 0 a 1)
-    :return: El tipo de estructura de recolección de agua recomendada.
-    """
     if magnitude_normalized <= 0.05:
         return "Estanques"
     elif 0.05 < magnitude_normalized <= 0.1:
@@ -57,7 +54,7 @@ flow_accumulation = generic_filter(flow_direction, accumulate_flow, size=3)
 flow_normalized = (flow_accumulation - flow_accumulation.min()) / (flow_accumulation.max() - flow_accumulation.min())
 
 # Paso 4: Identificar los n puntos con máximo flujo
-n = 100 # Puedes ajustar el número de puntos que quieres mostrar
+n = 100  # Puedes ajustar el número de puntos que quieres mostrar
 max_flow_indices = np.unravel_index(np.argsort(flow_accumulation.ravel())[-n:], flow_accumulation.shape)
 max_flow_points = list(zip(max_flow_indices[0], max_flow_indices[1]))
 
@@ -73,6 +70,7 @@ for y, x in max_flow_points:
     magnitude_normalized = slope_normalized[y, x]
     structure = classify_structure(magnitude_normalized)
     classified_points.append((coord_x, coord_y, magnitude_normalized, structure))
+
 
 # Paso 5: Visualización de Resultados
 
@@ -111,17 +109,94 @@ plt.colorbar(label='Flujo Normalizado')
 for point in normalized_max_flow_points:
     plt.plot(point[1] * cols, point[0] * rows, 'ro')  # Marcar puntos de máximo flujo en rojo, con coordenadas normalizadas
 
-# Mapa de puntos de máximo flujo con clasificación de estructuras
+# Mapa de puntos de máximo flujo con representación de estructuras
 plt.subplot(2, 3, 6)
 plt.title(f'Top {n} Puntos de Máximo Flujo (Normalizado)')
 plt.imshow(elevation, cmap='terrain')
 plt.colorbar(label='Elevación (m)')
 for i, (coord_x, coord_y, magnitude_norm, structure) in enumerate(classified_points):
-    plt.plot((coord_x - transform[2]) / transform[0], (coord_y - transform[5]) / transform[4], 'ro')
-    plt.text((coord_x - transform[2]) / transform[0], (coord_y - transform[5]) / transform[4], structure, fontsize=8, color='white')
+    x_plot = (coord_x - transform[2]) / transform[0]
+    y_plot = (coord_y - transform[5]) / transform[4]
+    
+    if structure == "Estanques":
+        plt.plot(x_plot, y_plot, 'bo', markersize=10)  # Círculo azul para estanques
+    elif structure == "Medias lunas":
+        plt.plot(x_plot, y_plot, 'ko', markersize=12)  # Círculo negro más grande
+        plt.plot([x_plot - 3, x_plot + 3], [y_plot, y_plot], 'k-', lw=3)  # Línea más larga para simular una media luna
+    elif structure == "Zanjas de infiltración":
+        plt.plot([x_plot - 2, x_plot + 2], [y_plot, y_plot], 'r-', lw=2)  # Línea roja para zanjas de infiltración
+    else:
+        plt.plot([x_plot - 2, x_plot + 2], [y_plot + 2, y_plot + 2], 'g-', lw=2)  # Línea verde para terrazas
+        plt.plot([x_plot - 2, x_plot + 2], [y_plot - 2, y_plot - 2], 'g-', lw=2)  # Segunda línea para simular una terraza
+
+# Crear los parches para la leyenda
+estanque_patch = mpatches.Patch(color='blue', label='Estanques')
+media_luna_patch = mpatches.Patch(color='black', label='MLunas')
+zanja_patch = mpatches.Patch(color='red', label='Zanjas')
+terraza_patch = mpatches.Patch(color='green', label='Terrazas')
+
+# Añadir la leyenda a la gráfica
+plt.legend(handles=[estanque_patch, media_luna_patch, zanja_patch, terraza_patch], loc='upper right', fontsize=10)
+
 
 plt.tight_layout()
 plt.show()
+
+# Crear una nueva figura más grande
+plt.figure(figsize=(20, 16))
+
+# Mapa de puntos de máximo flujo con representación de estructuras (gráfico grande)
+plt.title(f'Top {n} Puntos de Máximo Flujo (Normalizado)')
+plt.imshow(elevation, cmap='terrain')
+plt.colorbar(label='Elevación (m)')
+
+# Inicializar una lista para almacenar las coordenadas y la estructura correspondiente
+table_data = []
+
+# Iterar sobre los puntos clasificados para graficar cada estructura
+for i, (coord_x, coord_y, magnitude_norm, structure) in enumerate(classified_points):
+    x_plot = (coord_x - transform[2]) / transform[0]
+    y_plot = (coord_y - transform[5]) / transform[4]
+    
+    # Graficar cada punto con su símbolo correspondiente
+    if structure == "Estanques":
+        plt.plot(x_plot, y_plot, 'bo', markersize=10)  # Círculo azul para estanques
+    elif structure == "Medias lunas":
+        plt.plot(x_plot, y_plot, 'ko', markersize=12)  # Círculo negro más grande
+        plt.plot([x_plot - 3, x_plot + 3], [y_plot, y_plot], 'k-', lw=3)  # Línea más larga para simular una media luna
+    elif structure == "Zanjas de infiltración":
+        plt.plot([x_plot - 2, x_plot + 2], [y_plot, y_plot], 'r-', lw=2)  # Línea roja para zanjas de infiltración
+    else:
+        plt.plot([x_plot - 2, x_plot + 2], [y_plot + 2, y_plot + 2], 'g-', lw=2)  # Línea verde para terrazas
+        plt.plot([x_plot - 2, x_plot + 2], [y_plot - 2, y_plot - 2], 'g-', lw=2)  # Segunda línea para simular una terraza
+
+    # Numerar el punto en la gráfica
+    plt.text(x_plot, y_plot, str(i+1), fontsize=9, color='white', ha='center', va='center')
+
+    # Agregar las coordenadas y la estructura a la tabla
+    table_data.append([i+1, coord_x, coord_y, structure])
+
+# Crear los parches para la leyenda
+estanque_patch = mpatches.Patch(color='blue', label='Estanques')
+media_luna_patch = mpatches.Patch(color='black', label='Medias lunas')
+zanja_patch = mpatches.Patch(color='red', label='Zanjas de infiltración')
+terraza_patch = mpatches.Patch(color='green', label='Terrazas')
+
+# Añadir la leyenda a la gráfica
+plt.legend(handles=[estanque_patch, media_luna_patch, zanja_patch, terraza_patch], loc='upper right', fontsize=12)
+
+# Mostrar la gráfica
+plt.tight_layout()
+plt.show()
+
+# Crear una tabla con las coordenadas y las estructuras
+df = pd.DataFrame(table_data, columns=["Punto", "Coordenada X", "Coordenada Y", "Estructura"])
+
+# Mostrar la tabla en la consola
+print(df)
+
+df.to_csv('tabla_coordenadas_estructuras.csv', index=False)
+
 
 # Imprimir las clasificaciones para los puntos aleatorios
 for i, (coord_x, coord_y, magnitude_norm, structure) in enumerate(classified_points):
