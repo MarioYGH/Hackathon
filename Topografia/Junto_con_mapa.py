@@ -208,7 +208,8 @@ fig.add_trace(go.Heatmap(
     z=elevation,
     x=np.linspace(0, elevation.shape[1], elevation.shape[1]),
     y=np.linspace(0, elevation.shape[0], elevation.shape[0]),
-    colorscale='earth',
+    colorscale='spectral',
+    reversescale=True,
     showscale=False
 ))
 
@@ -261,8 +262,9 @@ fig.update_layout(
     xaxis_title="Coordenada X",
     yaxis_title="Coordenada Y",
     showlegend=True,
-    height=800,
-    width=1000,
+    height=1000,  # Aumentar el tamaño en altura
+    width=1200,   # Aumentar el tamaño en anchura
+    margin=dict(l=50, r=50, t=50, b=50)  # Ajustar márgenes para asegurarse de que todo esté visible
 )
 
 # Mostrar la gráfica interactiva
