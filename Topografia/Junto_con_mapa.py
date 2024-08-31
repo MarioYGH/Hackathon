@@ -233,26 +233,26 @@ for i, (coord_x, coord_y, magnitude_norm, structure) in enumerate(classified_poi
             mode='markers+text',
             text=[str(i+1)],
             textposition='top center',
-            marker=dict(color='black', size=12),
+            marker=dict(color='black', size=10),
             name=f'Media luna {i+1}'
         ))
     elif structure == "Zanjas de infiltración":
         fig.add_trace(go.Scatter(
             x=[x_plot], y=[y_plot],
-            mode='lines+text',
+            mode='markers+text',
             text=[str(i+1)],
             textposition='top center',
-            line=dict(color='red', width=2),
+            marker=dict(color='red', size=10),
             name=f'Zanja {i+1}'
         ))
     else:
         fig.add_trace(go.Scatter(
             x=[x_plot, x_plot],
             y=[y_plot + 2, y_plot - 2],
-            mode='lines+text',
+            mode='markers+text',
             text=[str(i+1)],
             textposition='top center',
-            line=dict(color='green', width=2),
+            marker=dict(color='green', size=10),
             name=f'Terraza {i+1}'
         ))
 
