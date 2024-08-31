@@ -40,7 +40,7 @@ flow_accumulation = generic_filter(flow_direction, accumulate_flow, size=3)
 flow_normalized = (flow_accumulation - flow_accumulation.min()) / (flow_accumulation.max() - flow_accumulation.min())
 
 # Paso 4: Identificar los n puntos con máximo flujo
-n = 10  # Puedes ajustar el número de puntos que quieres mostrar
+n = 100  # Puedes ajustar el número de puntos que quieres mostrar
 max_flow_indices = np.unravel_index(np.argsort(flow_accumulation.ravel())[-n:], flow_accumulation.shape)
 max_flow_points = list(zip(max_flow_indices[0], max_flow_indices[1]))
 
@@ -80,10 +80,11 @@ plt.colorbar(label='Pendiente Normalizada y Flujo Normalizado')
 # Mapa de puntos de máximo flujo
 plt.subplot(2, 3, 5)
 plt.title(f'Top {n} Puntos de Máximo Flujo (Normalizado)')
-plt.imshow(flow_normalized, cmap='hot')
+plt.imshow(normalized_max_flow_points, cmap='hot')
 plt.colorbar(label='Flujo Normalizado')
 for point in normalized_max_flow_points:
     plt.plot(point[1] * cols, point[0] * rows, 'ro')  # Marcar puntos de máximo flujo en rojo, con coordenadas normalizadas
 
 plt.tight_layout()
 plt.show()
+
